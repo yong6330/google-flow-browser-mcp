@@ -6,7 +6,7 @@ import { get } from '../utils/config.js';
 import { FlowError, ErrorCodes } from '../utils/errors.js';
 import { launchChromeDirect, setPage, setContext, setConnected, setBrowser, isBrowserConnected } from './connect.js';
 
-const CHROME_PATH = '/opt/google/chrome/chrome';
+const CHROME_PATH = get('chromePath', '/opt/google/chrome/chrome');
 const CDP_PORT = get('cdpPort', 9222);
 const FLOW_URL = get('flowUrl', 'https://labs.google/fx/fr/tools/flow');
 
@@ -16,12 +16,10 @@ export async function launchKiaraProfile(headless = false) {
     return { success: true, message: 'Already connected' };
   }
 
-  const profileSource = path.resolve(process.env.HOME, '.config/google-chrome/Profile 3');
-
-  if (!fs.existsSync(profileSource)) {
-    throw new FlowError(ErrorCodes.CONFIG_ERROR,
-      `Profile 3 not found at ${profileSource}. Make sure Chrome Profile 3 exists and is configured with your Google account.`);
-  }
+  // patched: attach to an already-running Chrome first. The profile-copy fallback
+  // below is Linux-only, so don't gate the CDP attach on its path existing.
+  const profileSource = get('chromeProfileSource',
+    path.resolve(process.env.HOME, '.config/google-chrome/Profile 3'));
 
   logger.info('Launching Chrome via direct+CDP method (anti-detection)', { profileSource });
 
@@ -30,7 +28,10 @@ export async function launchKiaraProfile(headless = false) {
     const existing = await chromium.connectOverCDP(`http://127.0.0.1:${CDP_PORT}`);
     logger.info('Found existing Chrome instance, reusing');
     const ctx = existing.contexts()[0];
-    const pg = ctx?.pages()[0];
+    const openPages = ctx?.pages() || [];
+    const pg = openPages.find(p => p.url().includes('flow.google.com'))
+            || openPages.find(p => p.url().includes('labs.google'))
+            || openPages[0];
     setBrowser(existing);
     setContext(ctx);
     setConnected(true);

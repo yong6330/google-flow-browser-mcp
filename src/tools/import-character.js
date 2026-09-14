@@ -2,7 +2,7 @@ import { logger } from '../utils/logger.js';
 import { getPage } from '../browser/connect.js';
 import { jobQueue } from '../queue/job-queue.js';
 import { takeScreenshot } from '../utils/screenshots.js';
-import { detectPageElements } from '../browser/safe-actions.js';
+import { detectPageElements, fastType } from '../browser/safe-actions.js';
 
 export async function handleImportCharacter(args) {
   const page = getPage();
@@ -37,7 +37,7 @@ export async function handleImportCharacter(args) {
       await descInput.click();
       await descInput.fill('');
       await page.waitForTimeout(200);
-      await descInput.type(args.description, { delay: 20 });
+      await fastType(descInput, args.description);
     }
   }
 

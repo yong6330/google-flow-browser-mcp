@@ -27,6 +27,10 @@
 
 ---
 
+> **Fork notice**: this is a fork of [TMSSS05/google-flow-browser-mcp](https://github.com/TMSSS05/google-flow-browser-mcp), refined while using it on a real production video project — multi-account/multi-instance support, safer tab targeting (never grabs an unrelated tab in the same browser), video generation fixes, and a few other stability improvements. All credit for the original design goes to TMSSS05.
+
+---
+
 > **🇫🇷 Ce serveur MCP permet à votre agent AI (OpenCode) d'utiliser Google Flow pour générer des images et des vidéos, via votre propre compte Google et sans partager vos identifiants.**
 
 ---
@@ -94,7 +98,7 @@ All through your **own Google account** — no API keys, no third-party tokens.
 ### 1️⃣ Install
 
 ```bash
-git clone https://github.com/TMSSS05/google-flow-browser-mcp.git
+git clone https://github.com/yong6330/google-flow-browser-mcp.git
 cd google-flow-browser-mcp
 npm install
 ```
@@ -396,7 +400,7 @@ Contributions are welcome! Please follow these guidelines:
 
 ## 📄 License
 
-[MIT](./LICENSE) © TMSSS05
+[MIT](./LICENSE). Original work © [TMSSS05](https://github.com/TMSSS05/google-flow-browser-mcp) (the upstream repository carries an MIT badge but has no `LICENSE` file at the time of this fork — this fork adds one, honoring that stated intent). Modifications in this fork © yong6330.
 
 ---
 
@@ -404,7 +408,7 @@ Contributions are welcome! Please follow these guidelines:
   <sub>Built with ❤️ for the OpenCode ecosystem</sub>
   <br>
   <sub>
-    <a href="https://github.com/TMSSS05/google-flow-browser-mcp/issues">Report Issue</a> ·
-    <a href="https://github.com/TMSSS05/google-flow-browser-mcp/discussions">Discussion</a>
+    <a href="https://github.com/yong6330/google-flow-browser-mcp/issues">Report Issue</a> ·
+    <a href="https://github.com/yong6330/google-flow-browser-mcp/discussions">Discussion</a>
   </sub>
 </div>

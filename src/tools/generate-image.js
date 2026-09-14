@@ -1,5 +1,10 @@
+import { fastType } from '../browser/safe-actions.js';
 import { logger } from '../utils/logger.js';
 import { getPage } from '../browser/connect.js';
+import { ensureOutputMode, assertMode } from '../browser/output-mode.js';
+import { addIngredients } from '../browser/ingredients.js';
+import { downloadNewest } from '../browser/download.js';
+import { renameMedia } from '../browser/rename.js';
 import { jobQueue } from '../queue/job-queue.js';
 import { FlowError, ErrorCodes } from '../utils/errors.js';
 import { takeScreenshot } from '../utils/screenshots.js';
@@ -156,7 +161,23 @@ export async function handleGenerateImage(args) {
     await promptInput.click();
     await promptInput.fill('');
     await page.waitForTimeout(200);
-    await promptInput.type(args.prompt, { delay: 15 });
+    // Flow's prompt bar keeps its own output mode; set it before typing.
+    await ensureOutputMode(page, 'image', ratio);
+
+    await fastType(promptInput, args.prompt);
+
+    // Attach project media as 소재. The upstream tool declared this parameter
+
+    // but never implemented it, so references were silently dropped.
+
+    let referencesAttached = { attached: [], missing: [] };
+
+    if (Array.isArray(args.reference_images) && args.reference_images.length) {
+
+      referencesAttached = await addIngredients(page, args.reference_images);
+
+    }
+
     logger.info('Prompt filled', { promptLength: args.prompt.length });
     await page.waitForTimeout(500);
 
@@ -171,6 +192,7 @@ export async function handleGenerateImage(args) {
           'Pour générer et consommer des crédits, rappelle avec auto_confirm=true.',
         model_used: model,
         ratio,
+        references: referencesAttached,
         prompt: args.prompt,
         account: get('expectedAccount'),
         screenshot: setupScreenshot,
@@ -182,6 +204,7 @@ export async function handleGenerateImage(args) {
 
     // 🛡️ SAFETY: Pre-generation screenshot verification
     logger.info('⚠️ auto_confirm=true — vérifications de sécurité avant clic Generate');
+    await assertMode(page, 'image');
     const preGenScreenshot = await takeScreenshot(page, 'pre-generate-verification');
 
     // STEP 8: Find generate button
@@ -280,44 +303,38 @@ export async function handleGenerateImage(args) {
       }
     }
 
-    if (generatedImageUuids.length === 0) {
-      await takeScreenshot(page, 'no-images-detected');
-      throw new FlowError(ErrorCodes.DOWNLOAD_FAILED,
-        'Generation completed but no images were detected in the DOM. ' +
-        'Check the Flow project content library.');
+    // Flow renders a "실패 / 사용량 한도에 도달했습니다" card when the account hits its
+    // usage cap. Nothing is charged, but the run must not report success —
+    // otherwise the downloader silently re-fetches the previous batch.
+    const quotaHit = await page.evaluate(() => {
+      // Scope the check to the NEWEST result card only. Scanning the whole page
+      // re-reads stale failure cards from earlier runs and blocks good runs.
+      const cards = [...document.querySelectorAll('[class*="result"], [class*="generation"], [class*="batch"]')]
+        .filter(el => el.getBoundingClientRect().width > 0);
+      const scope = cards.length ? cards[0] : null;
+      const t = (scope ? scope.innerText : '') || '';
+      return /사용량 한도에 도달|usage limit|quota/i.test(t) && /실패|failed/i.test(t);
+    }).catch(() => false);
+    if (quotaHit) {
+      await takeScreenshot(page, 'quota-limit');
+      throw new FlowError(ErrorCodes.GENERATION_BUTTON_DISABLED,
+        'Flow reports 사용량 한도에 도달했습니다 (usage limit reached). Nothing was charged. ' +
+        'Wait for the quota to reset or switch to the other account.');
     }
 
-    // STEP 13: Download generated images via authenticated session
-    logger.info('Downloading generated images', { count: generatedImageUuids.length });
-    const downloadedFiles = [];
-
-    for (const uuid of generatedImageUuids) {
-      try {
-        const response = await page.goto(
-          `https://labs.google/fx/api/trpc/media.getMediaUrlRedirect?name=${uuid}`,
-          { waitUntil: 'load', timeout: 15000 }
-        );
-
-        if (response && response.ok()) {
-          const contentType = response.headers()['content-type'] || '';
-          if (contentType.startsWith('image/')) {
-            const buffer = await response.body();
-            const ext = contentType === 'image/png' ? '.png' : '.jpg';
-            const destPath = path.join(outputDir, `flow_${uuid.substring(0, 8)}_${job.id}${ext}`);
-            fs.writeFileSync(destPath, buffer);
-            downloadedFiles.push(destPath);
-            logger.info('Image downloaded', { uuid, size: buffer.length, path: destPath });
-          }
-        }
-      } catch (err) {
-        logger.warn('Failed to download image', { uuid, error: err.message });
-      }
+    // Flow moved to flow.google.com; the old UUID→labs.google API lookup no
+    // longer resolves, so save straight from the result card instead.
+    const baseName = args.name || `flow_${job.id}`;
+    let downloadedFiles = [];
+    try {
+      downloadedFiles = await downloadNewest(page, outputDir, baseName);
+    } catch (err) {
+      logger.warn('Download failed; the images still exist in the project', { error: err.message });
     }
 
-    if (downloadedFiles.length === 0) {
-      await takeScreenshot(page, 'download-failed');
-      throw new FlowError(ErrorCodes.DOWNLOAD_FAILED,
-        'Failed to download any generated images via the authenticated session');
+    if (args.name) {
+      try { await renameMedia(page, args.autoCaption || args.name, args.name); }
+      catch (err) { logger.warn('In-Flow rename skipped', { error: err.message }); }
     }
 
     saveMetadata(job.id, {

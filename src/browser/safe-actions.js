@@ -45,7 +45,9 @@ export async function safeFill(selector, text, options = {}) {
   await element.click();
   await element.fill('');
   await delay(200);
-  await element.type(text, { delay: 30 });
+  await element.fill('').catch(() => {});
+  await element.press('ControlOrMeta+a').catch(() => {});
+  await page.keyboard.insertText(text);
   await delay(postDelay);
   logger.debug('Filled input', { selector, textLength: text.length });
 }
@@ -178,4 +180,20 @@ export async function detectPageElements() {
   });
 
   return elements;
+}
+
+/**
+ * Insert text in one shot instead of per-character typing.
+ * Flow's prompt box is a ProseMirror contenteditable and these prompts run to
+ * thousands of characters — locator.type() with a per-char delay blows the
+ * 30s timeout every time. keyboard.insertText fires the same input events
+ * ProseMirror listens for, but in a single operation.
+ */
+export async function fastType(locator, text) {
+  await locator.click();
+  const page = locator.page();
+  await page.keyboard.press('ControlOrMeta+a').catch(() => {});
+  await page.keyboard.press('Backspace').catch(() => {});
+  await page.keyboard.insertText(text);
+  await page.waitForTimeout(300);
 }

@@ -1,7 +1,7 @@
 import { logger } from '../utils/logger.js';
 import { getPage } from '../browser/connect.js';
 import { takeScreenshot } from '../utils/screenshots.js';
-import { detectPageElements } from '../browser/safe-actions.js';
+import { detectPageElements, fastType } from '../browser/safe-actions.js';
 import { saveMetadata } from '../utils/file-manager.js';
 import { ensureProjectInContext, navigateToSidebar } from '../navigation/project-navigator.js';
 
@@ -49,7 +49,7 @@ export async function handleCreateScene(args) {
         await inputLocator.click();
         await inputLocator.fill('');
         await page.waitForTimeout(200);
-        await inputLocator.type(args.description, { delay: 20 });
+        await fastType(inputLocator, args.description);
       }
     }
 

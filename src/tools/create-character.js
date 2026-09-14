@@ -4,7 +4,7 @@ import { jobQueue } from '../queue/job-queue.js';
 import { takeScreenshot } from '../utils/screenshots.js';
 import { FlowError, ErrorCodes } from '../utils/errors.js';
 import { get } from '../utils/config.js';
-import { detectPageElements } from '../browser/safe-actions.js';
+import { detectPageElements, fastType } from '../browser/safe-actions.js';
 import { saveMetadata } from '../utils/file-manager.js';
 import { ensureProjectInContext, navigateToSidebar } from '../navigation/project-navigator.js';
 
@@ -60,7 +60,7 @@ export async function handleCreateCharacter(args) {
       await descLocator.click();
       await descLocator.fill('');
       await page.waitForTimeout(200);
-      await descLocator.type(args.description, { delay: 20 });
+      await fastType(descLocator, args.description);
     }
 
     // Upload reference image if provided

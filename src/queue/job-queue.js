@@ -24,6 +24,19 @@ class JobQueue {
    * Throws JOB_IN_PROGRESS if another job is already active.
    */
   createJob(type, params = {}) {
+    // A run that dies before its catch block (e.g. the browser dropped) leaves
+    // currentJob stuck on 'running' and blocks every later call. Treat a job
+    // that has outlived the job timeout as abandoned instead of wedging.
+    if (this.currentJob && this.currentJob.status === 'running') {
+      const startedAt = Date.parse(this.currentJob.startedAt || this.currentJob.createdAt || 0);
+      const maxAge = Number(process.env.FLOW_JOB_MAX_AGE_MS || 120000);
+      if (Number.isFinite(startedAt) && Date.now() - startedAt > maxAge) {
+        this.currentJob.status = 'failed';
+        this.currentJob.error = 'abandoned: exceeded max age without completing';
+        this.currentJob = null;
+      }
+    }
+
     if (this.currentJob && this.currentJob.status === 'running') {
       throw new FlowError(
         ErrorCodes.JOB_IN_PROGRESS,

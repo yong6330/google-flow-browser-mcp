@@ -2,7 +2,7 @@ import { logger } from '../utils/logger.js';
 import { getPage } from '../browser/connect.js';
 import { jobQueue } from '../queue/job-queue.js';
 import { takeScreenshot } from '../utils/screenshots.js';
-import { detectPageElements } from '../browser/safe-actions.js';
+import { detectPageElements, fastType } from '../browser/safe-actions.js';
 import { saveMetadata } from '../utils/file-manager.js';
 import { FlowError, ErrorCodes } from '../utils/errors.js';
 import { ensureProjectInContext, navigateToSidebar } from '../navigation/project-navigator.js';
@@ -83,7 +83,7 @@ export async function handleUseGridArchitect(args) {
         await themeLocator.click();
         await themeLocator.fill('');
         await page.waitForTimeout(200);
-        await themeLocator.type(args.theme_prompt, { delay: 15 });
+        await fastType(themeLocator, args.theme_prompt);
         await page.waitForTimeout(500);
       }
     }
@@ -101,7 +101,7 @@ export async function handleUseGridArchitect(args) {
           if (await nearestTextarea.isVisible().catch(() => false)) {
             await nearestTextarea.fill('');
             await page.waitForTimeout(200);
-            await nearestTextarea.type(args.shot_prompts[i], { delay: 15 });
+            await fastType(nearestTextarea, args.shot_prompts[i]);
             await page.waitForTimeout(500);
           }
         }

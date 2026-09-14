@@ -34,8 +34,12 @@ export async function connectToBrowser(options = {}) {
       context = await browser.newContext();
     }
 
+    // Pick the Flow tab, never just pages[0] — the user browses in other tabs of
+    // this same Chrome, and grabbing one of those would type prompts into it.
     const pages = context.pages();
-    page = pages.length > 0 ? pages[0] : await context.newPage();
+    page = pages.find(p => p.url().includes('flow.google.com'))
+        || pages.find(p => p.url().includes('labs.google'))
+        || (pages.length > 0 ? pages[0] : await context.newPage());
     isConnected = true;
     logger.info('Browser connected successfully');
     return { browser, context, page };

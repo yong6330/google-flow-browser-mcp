@@ -1,7 +1,7 @@
 import { logger } from '../utils/logger.js';
 import { getPage } from '../browser/connect.js';
 import { takeScreenshot } from '../utils/screenshots.js';
-import { detectPageElements } from '../browser/safe-actions.js';
+import { detectPageElements, fastType } from '../browser/safe-actions.js';
 import { ensureProjectInContext, navigateToSidebar } from '../navigation/project-navigator.js';
 
 export async function handleUseFlowTool(args) {
@@ -49,7 +49,7 @@ export async function handleUseFlowTool(args) {
           await input.click();
           await input.fill('');
           await page.waitForTimeout(200);
-          await input.type(value, { delay: 10 });
+          await fastType(input, value);
         }
       }
     }
