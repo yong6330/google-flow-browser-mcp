@@ -8,14 +8,14 @@ description: End-to-end workflow for producing a video from AI-generated clips (
 A pipeline that turns a concept into a finished video from AI-generated clips. It was distilled from a 30-cut music video made with Google Flow (via the `google-flow-browser-mcp` server) and edited with Python + FFmpeg. Everything here is generalised; adapt names and numbers to the project.
 
 Read the reference files only when you reach that stage:
-- `references/generation.md` — cut sheet, base images, video generation, Flow specifics, delegating to Codex CLI, failure catalogue
-- `references/qa.md` — frame-by-frame review checklist and how to report
-- `references/editing.md` — beat-synced edit, subtitles/typography, grading, delivery, 9:16
-- `references/orchestration.md` — how to supervise operators, parallel jobs, credits, cleanup, cross-session hand-offs
+- `references/generation.md`: cut sheet, base images, video generation, Flow specifics, delegating to Codex CLI, failure catalogue
+- `references/qa.md`: frame-by-frame review checklist and how to report
+- `references/editing.md`: beat-synced edit, subtitles/typography, grading, delivery, 9:16
+- `references/orchestration.md`: how to supervise operators, parallel jobs, credits, cleanup, cross-session hand-offs
 
 ## Non-negotiables
 
-1. **Intent before pixels.** Write the cut sheet first and get it confirmed. For every cut note the *intent* (what the viewer should feel/understand) — the user judges OK/not-OK by intent, so you must be able to state it when asked.
+1. **Intent before pixels.** Write the cut sheet first and get it confirmed. For every cut note the *intent* (what the viewer should feel/understand). The user judges OK/not-OK by intent, so you must be able to state it when asked.
 2. **Continuity is designed, not hoped for.** For each cut write one line each: previous cut's end state → this cut → next cut's start state (viewpoint, who is visible, direction of movement, which side things are on). Most "regenerate this" requests during editing are continuity gaps that were visible in the sheet.
 3. **Look-development one cut at a time, production in parallel.** Until the style, characters and scale are accepted, show each base image and get approval. After that run up to 3 jobs in parallel.
 4. **Verify before spending, verify before claiming.** Paid steps (generation, upscale) start only after the settings and cost are known. Never report a clip, image or fix as good without looking at frames from the final file. "Passed" from an operator is a claim, not evidence.
@@ -51,4 +51,4 @@ Read the reference files only when you reach that stage:
 - A generation tool: Google Flow through the `google-flow-browser-mcp` MCP server, or its scripts, or manual use.
 - An image generator for base images (Codex CLI image tool, Nano Banana, etc.).
 - Python (with numpy, Pillow, OpenCV) and FFmpeg/ffprobe for edit and QA.
-- Optional: another CLI agent (Codex) as an operator — see `references/orchestration.md`.
+- Optional: another CLI agent (Codex) as an operator: see `references/orchestration.md`.

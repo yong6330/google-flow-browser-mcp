@@ -6,7 +6,7 @@ Rules marked ✔ were confirmed by the user during a real project; ✘ were reje
 
 - **One script, one cut table.** A single `edit.py OUT [T0 T1]` reads a cut table (clip, source start, start beat, end beat) as the only timeline source. Rendering is a frame loop (numpy compositing) piped into FFmpeg. Benefits: beat math, subtitles, typography, composites and grading reproduce from one place; partial renders (`T0 T1`) make quick tests; one option generates a derivative (`--vertical` 9:16, `--short` under 60 s). Cost: slow (≈6–7 min for 81 s FHD) and ordering bugs become on-screen bugs.
 - Before rendering any derivative **assert**: frames used = frames expected, subtitle windows do not overlap, and a changed start point also moves the previous cut's end (overlapping cuts put the previous cut in the first frame and shift audio sync).
-- **Beat snapping.** Keep BPM, first-beat time and the downbeat rule as constants; write cut boundaries as beat numbers: `t(n) = first_beat + n × period`. Cuts land on a bar's first beat; a lyric pick-up (half a beat early) pulls the cut half a beat earlier. Verify word timings in the lyric file against the vocal energy envelope — a first word was found attached to beat 0 incorrectly.
+- **Beat snapping.** Keep BPM, first-beat time and the downbeat rule as constants; write cut boundaries as beat numbers: `t(n) = first_beat + n × period`. Cuts land on a bar's first beat; a lyric pick-up (half a beat early) pulls the cut half a beat earlier. Verify word timings in the lyric file against the vocal energy envelope. A first word was found attached to beat 0 incorrectly.
 - Keep the clips' **native frame rate** (24 fps) in the output; converting to 30 fps duplicates frames and judders. Keep playback speed 1.0.
 - Make cuts and effects by **frame index**, not rounded seconds, so an effect never lands a frame late.
 
@@ -40,7 +40,7 @@ Rules marked ✔ were confirmed by the user during a real project; ✘ were reje
 
 1. FHD render → check the finished file frame by frame (cut points, subtitle starts/ends, effects, composites, the first and last second, audio sync).
 2. Report with a contact sheet; wait for approval.
-3. Only then 4K (Lanczos upscale was accepted for platform quality assignment; AI upscalers were not available) — **never chained to the FHD render**.
+3. Only then 4K (Lanczos upscale was accepted for platform quality assignment; AI upscalers were not available). **Never chained to the FHD render**.
 4. Derivatives (vertical/short) follow the same FHD → check → approve → 4K order. Run heavy renders one at a time; parallel FHD only with permission.
 5. Thumbnails, if requested, are separate deliverables.
 6. Before saying "fixed", look at that exact segment in the **finished** file. Claims made without that check were corrected twice.

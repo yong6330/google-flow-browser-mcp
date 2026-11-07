@@ -21,7 +21,7 @@ codex exec -m <model> -c 'model_reasoning_effort="low|medium|high"' -s workspace
 - Operators work best with a **resumable state file** and a **ledger**; tell them never to submit a paid job twice and to check the tool's UI for in-flight jobs before retrying.
 - Inside a sandbox, Chrome may crash at launch (Crashpad permission): start Chrome yourself from a normal shell with a CDP port and a dedicated profile, then let the operator attach.
 - If a delegated run is interrupted, read its ledger and the tool UI before restarting, and tell the new run what was already submitted.
-- When an operator's "pass" disagrees with the user's eyes, treat the QC criteria as wrong and rewrite them (more frames, numeric checks), then re-run — do not argue the verdict.
+- When an operator's "pass" disagrees with the user's eyes, treat the QC criteria as wrong and rewrite them (more frames, numeric checks), then re-run. Do not argue the verdict.
 - If the same step fails three times in a row, take over, find the root cause yourself, fix the script, then hand the job back.
 
 ## Parallelism and cost

@@ -16,7 +16,7 @@ claude mcp add google-flow -- npx -y github:yong6330/google-flow-browser-mcp
 
 Restart the MCP client, ask it to call `flow_connect`, and sign in in the visible dedicated browser window. Run `flow_connect` again after sign-in. Ask for `flow_projects` with `action: "list"`, then open a project. Ask for a dry-run image or video setup; inspect the settings and cost before giving confirmation.
 
-The GitHub command installs the version currently on that repository's default branch. Local changes on `universal-v2` are available only locally until the maintainer publishes them. This work does not push or change remotes.
+The GitHub command installs the version on the default branch (`main`).
 
 Claude Desktop configuration (merge into its existing `mcpServers` object):
 
