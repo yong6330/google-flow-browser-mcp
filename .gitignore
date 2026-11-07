@@ -1,15 +1,5 @@
 node_modules/
-logs/
-screenshots-debug/
-outputs/
-output/
-chrome-profile-kiara/
-screenshot*.png
-config/flow.config.json
-config/flow.config.*.json
-!config/flow.config.example.json
-config/flow.projects.json
+.test-tmp/
 .env
 .DS_Store
 *.log
-test-agent-generation.js

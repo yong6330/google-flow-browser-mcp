@@ -1,52 +1,29 @@
-import fs from 'fs';
-import path from 'path';
-
-let logStream = null;
-const LOG_DIR = path.resolve(import.meta.dirname, '../../logs');
-
-function ensureLogDir() {
-  if (!fs.existsSync(LOG_DIR)) {
-    fs.mkdirSync(LOG_DIR, { recursive: true });
+import fs from "node:fs";
+import path from "node:path";
+import { dataPaths } from "./config.js";
+function log(level, message, data) {
+  const line = JSON.stringify({
+    time: new Date().toISOString(),
+    level,
+    message,
+    ...data,
+  });
+  process.stderr.write(line + "\n");
+  try {
+    const dir = dataPaths().logs;
+    fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
+    fs.appendFileSync(
+      path.join(dir, `flow-${new Date().toISOString().slice(0, 10)}.log`),
+      line + "\n",
+      { mode: 0o600 },
+    );
+  } catch {
+    /* stderr remains available */
   }
 }
-
-function getLogStream() {
-  if (!logStream) {
-    ensureLogDir();
-    const logFile = path.join(LOG_DIR, `flow-${new Date().toISOString().slice(0, 10)}.log`);
-    logStream = fs.createWriteStream(logFile, { flags: 'a' });
-  }
-  return logStream;
-}
-
-function timestamp() {
-  return new Date().toISOString();
-}
-
-export const logger = {
-  info(msg, data = {}) {
-    const line = `[${timestamp()}] INFO  ${msg} ${Object.keys(data).length ? JSON.stringify(data) : ''}`;
-    console.log(line);
-    getLogStream().write(line + '\n');
-  },
-
-  warn(msg, data = {}) {
-    const line = `[${timestamp()}] WARN  ${msg} ${Object.keys(data).length ? JSON.stringify(data) : ''}`;
-    console.warn(line);
-    getLogStream().write(line + '\n');
-  },
-
-  error(msg, data = {}) {
-    const line = `[${timestamp()}] ERROR ${msg} ${Object.keys(data).length ? JSON.stringify(data) : ''}`;
-    console.error(line);
-    getLogStream().write(line + '\n');
-  },
-
-  debug(msg, data = {}) {
-    const line = `[${timestamp()}] DEBUG ${msg} ${Object.keys(data).length ? JSON.stringify(data) : ''}`;
-    if (process.env.DEBUG) {
-      console.debug(line);
-    }
-    getLogStream().write(line + '\n');
-  }
-};
+export const logger = Object.fromEntries(
+  ["info", "warn", "error", "debug"].map((level) => [
+    level,
+    (message, data = {}) => log(level, message, data),
+  ]),
+);
