@@ -62,7 +62,7 @@ Config file: `$FLOW_MCP_CONFIG`, or:
 | --------------------- | -------------------------------- | ---------------------------------------------------------------------------------- |
 | `home`                | `FLOW_MCP_HOME`                  | `~/.google-flow-mcp` (absolute path)                                               |
 | `chromePath`          | `FLOW_MCP_CHROME_PATH`           | Automatic system browser discovery; `flow_connect` override                        |
-| `flowUrl`             | `FLOW_MCP_FLOW_URL`              | `https://labs.google/fx/tools/flow`                                                |
+| `flowUrl`             | `FLOW_MCP_FLOW_URL`              | `https://flow.google.com/`                                                         |
 | `expectedAccount`     | `FLOW_MCP_EXPECTED_ACCOUNT`      | Unset; report email if available. If set, require a match; `flow_connect` override |
 | `cdpPort`             | `FLOW_MCP_CDP_PORT`              | `9222`; choose a free port if occupied; `flow_connect` override                    |
 | `headless`            | `FLOW_MCP_HEADLESS`              | `false`; use visible first-run sign-in; `flow_connect` override                    |
@@ -93,7 +93,7 @@ All tools validate arguments and expose JSON schemas via MCP `tools/list`. Asset
 | `flow_list_assets`                                                         | `type: image\|video\|all`, `include_trashed`; scans the virtual grid, including both trash columns                                                                         |
 | `flow_upload_media`                                                        | Absolute `paths[]`, `wait`; deduplicate by file name and confirm ingestion; returns a job                                                                                  |
 | `flow_generate_image`                                                      | `prompt`, `model`, `ratio`, `quantity` 1–4, `reference_images[]` (existing asset names)                                                                                    |
-| `flow_generate_video`                                                      | `prompt`, `mode: text\|frames\|ingredients`, `start_image`, optional `end_image`, or `reference_images[]`; model, duration 4/6/8/10, resolution 360p/720p, ratio, quantity |
+| `flow_generate_video`                                                      | `prompt`, `mode: text\|frames\|ingredients`, `start_image`, optional `end_image`, or `reference_images[]`; optional `model` (as Flow shows it, e.g. `Omni 1.2 Flash`), optional `duration` in seconds and `resolution` 360p/720p (omitted values keep Flow's current selection; Veo 3.1 has neither), ratio, quantity |
 | `flow_rename_asset`                                                        | `match`, `name`; verify the opened caption field before typing                                                                                                             |
 | `flow_trash_assets` / `flow_restore_assets`                                | `matches[]`, dry run unless `confirm: true`; no permanent-delete tool                                                                                                      |
 | `flow_download_asset`                                                      | `match`, `quality: 270p-gif\|720p\|1080p`, `output_folder`; 1080p routes through paid upscale safeguards                                                                   |
@@ -159,7 +159,7 @@ The default script never spends credits. Use a signed-in dedicated profile, run 
 
 ## Safety and responsibility
 
-Use only an account you are authorized to operate and comply with Google's terms and applicable rules. You are responsible for prompts, generated content, subscriptions and credit spending. Do not remove or cover Flow's sparkle watermark. Never share the profile directory, cookies or job/log files containing sensitive prompts. There is no telemetry. No credential entry, verification bypass, permanent deletion, or unrelated-tab manipulation is offered.
+Use only an account you are authorized to operate and comply with Google's terms and applicable rules. You are responsible for prompts, generated content, subscriptions and credit spending. Do not remove or cover Flow's sparkle watermark. Never share the profile directory, cookies or job/log files containing sensitive prompts. There is no telemetry. No credential entry, verification bypass, permanent deletion, or unrelated-tab manipulation is offered. The server works in its own background tab, so it never brings a tab to the front or moves the window you are using.
 
 ## 한국어 안내
 

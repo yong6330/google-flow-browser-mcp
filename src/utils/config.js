@@ -98,7 +98,7 @@ export function loadConfig(
     if (!(key in configSchema.shape)) warn(`Unknown config key: ${key}`);
   const defaults = {
     home: locations.home,
-    flowUrl: "https://labs.google/fx/tools/flow",
+    flowUrl: "https://flow.google.com/",
     cdpPort: 9222,
     headless: false,
     maxConcurrentJobs: 1,

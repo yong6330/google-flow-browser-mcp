@@ -11,7 +11,7 @@ import { logger } from "./utils/logger.js";
 import { acquireServerLock } from "./queue/server-lock.js";
 acquireServerLock();
 const server = new Server(
-  { name: "google-flow-browser-mcp", version: "2.0.0" },
+  { name: "google-flow-browser-mcp", version: "2.1.0" },
   { capabilities: { tools: {} } },
 );
 server.setRequestHandler(ListToolsRequestSchema, async () => ({

@@ -1,13 +1,15 @@
 # Google Flow UI notes (field-tested)
 
-Facts learned while running a 30-clip production through Flow with browser automation. Verified in the **Korean** UI (`ko`) in October 2026; English/French/other labels are best-effort and must be confirmed. Flow's DOM changes without notice — prefer role/aria/structure over text, keep every selector in one module, and fail loudly instead of guessing.
+Facts learned while running a 30-clip production through Flow with browser automation. Verified in the **Korean** UI (`ko`) in October 2026 and rechecked in November 2026; English/French/other labels are best-effort and must be confirmed. Flow's DOM changes without notice — prefer role/aria/structure over text, keep every selector in one module, and fail loudly instead of guessing.
 
 ## URLs
-- Landing / tools: `https://labs.google/fx/tools/flow` (locale-neutral; do not hardcode `/fr/`).
+- Home: `https://flow.google.com/` (November 2026). The older `https://labs.google/fx/tools/flow` address was the home before that.
+- Home project cards: every card link reads "Open project" (ko: 프로젝트 열기). The project name is in `.project-card .project-title-text`.
 - Project: `https://flow.google.com/project/<projectId>`; sections: `/character`, `/trash`; media detail view: `/project/<projectId>/edit/<mediaId>`.
 - A card is opened by clicking its thumbnail; the detail view has the title field, a download button and a delete button.
 
 ## Project page layout
+- The section list is `mat-nav-list[role="navigation"]` (ko aria-label: 프로젝트 탐색). A second plain `<nav class="nav-header">` above it holds only the home button, so scope to `[role="navigation"]`. Flow renders it a moment after navigation; wait for it before counting.
 - Left nav: All media · Images · Videos · Characters · Scenes · Uploads · Tools · Trash. (ko: 전체 미디어 · 이미지 · 동영상 · 캐릭터 · 장면 · 업로드 · 도구 · 휴지통.) The "Videos" nav item filters the grid, but the text also appears in the prompt-bar chip, so click the nav entry, not the first text match.
 - The grid is a **virtual scroller**: `.cdk-virtual-scrollable.page-container`. Only visible rows exist in the DOM. Scroll `scrollTop` in steps (~300–400 px) and collect tiles; stop when `scrollTop` stops changing. Do not trust `scrollHeight / rowHeight` as an item count.
 - Tiles are `flow-grid-tile-container` elements. `aria-label` = the card **caption** (auto-generated from the prompt, or the name you set). The caption can be truncated with `…`.
@@ -18,7 +20,14 @@ Facts learned while running a 30-clip production through Flow with browser autom
 - After renaming or trashing, the grid caption may be **stale until the page is reloaded**. Re-read in a fresh navigation before concluding that an action failed.
 
 ## Prompt bar
-- Collapsed chip like `Video · 720p · 8s · x1` opens the settings popover: Image/Video tabs; **Frames** vs **Ingredients** sub-mode (ko: 프레임 / 소재); aspect (16:9, 9:16); model dropdown (e.g. `Omni 1.1 Flash`, Veo 3.1 variants, Nano Banana Pro/2, Imagen 4); resolution (360p / 720p); duration buttons (4/6/8/10 s); quantity x1–x4; a footer line that states the **credit cost** (ko: `생성 시 12 크레딧이 사용됩니다`). Read it before generating.
+- Collapsed chip like `Video · 720p · 8s · x1` opens the settings popover (the overlay that contains `flow-prompt-box-settings`): Image/Video tabs; **Frames** vs **Ingredients** sub-mode (ko: 프레임 / 소재); aspect (16:9, 9:16; images also 4:3, 1:1, 3:4); model dropdown; resolution; duration; quantity x1–x4; a footer line that states the **credit cost** (ko: `생성 시 24 크레딧이 사용됩니다`). Read it before generating.
+- Every option button starts with an icon ligature glued to its label in `textContent` (`crop_16_916:9`, `360pinfo`). Match the label with icons removed, never the raw text.
+- Video models in November 2026: `Omni 1.2 Flash` (default), `Omni 1.1 Flash`, `Veo 3.1 - Lite`, `Veo 3.1 - Fast`, `Veo 3.1 - Quality`. The menu items are `role="menuitem"` with the name in `.label` and a `.caption` such as "12월 5일에 지원 중단 예정" (Omni 1.1 Flash, Veo Fast and Veo Quality are marked for retirement on December 5). Veo names carry a dash. The image model is `Nano Banana 2.1`, which shows a Thinking level and costs 0 credits.
+- The options depend on the model, so pick the model first:
+  - Omni 1.2 Flash: 360p/720p and a **length slider** (`flow-duration-slider input[type=range]`, label `.duration-slider-value` such as `8초`). Arrow keys step it by one second. 7 s cost 42 and 8 s cost 48 credits at 720p x2; 8 s 720p x1 costs 24, 4 s costs 12.
+  - Omni 1.1 Flash: 360p/720p and duration buttons 4/6/8/10 s.
+  - Veo 3.1: no resolution or length controls. Lite costs 10 and Fast 20 credits per clip.
+- Flow keeps the last selected model, resolution and length. Omitted settings keep that state.
 - **Frames mode** exposes `Start` and `End` slots (ko: 시작/종료). Clicking a slot opens an asset picker (search box + list); choosing an item attaches it. Using an end frame is the most reliable way to force a motion direction (e.g. which way a door opens).
 - Ingredients mode: the `+` button opens the asset picker (also has an "upload media" entry that opens a native file chooser — use Playwright's `filechooser` event).
 - Generate = the arrow button (aria-label ko: 생성 시작). Generation is asynchronous: the new card appears at the top of the grid while rendering.
@@ -43,7 +52,14 @@ Facts learned while running a 30-clip production through Flow with browser autom
 - `page.screenshot()` can hang for 30–90 s on pages with many `<video>` tiles (waiting for fonts/compositing). Use a short timeout, take screenshots in the detail view, or use CDP `Page.captureScreenshot`.
 
 ## Account / credits
-- The avatar/plan chip (e.g. `PRO`) opens an account popover that shows the signed-in email and a line like `Google Flow credits N`. Daily free credits are spent first.
+- The header avatar button (`.header-user-button`) opens the account panel (`[role="dialog"].panel`) with the signed-in email and a line like `Google Flow 크레딧 1,050개`. Daily free credits are spent first.
+- The Google bar account link sits under Flow's own header button. Click Flow's button or the click is intercepted.
+- The panel **ignores Escape**. Close it with its `close` icon button only. The same panel has "Sign out of all accounts" (ko: 모든 계정에서 로그아웃): never click it.
+- Wait for the email to render before reading the panel. A panel read during its open or close animation has no email or balance.
+- Every page footer carries a reCAPTCHA notice ("This site is protected by reCAPTCHA"). Do not treat the word captcha in page text as a login challenge.
+
+## Working without taking over the user's screen
+- Open automation tabs with CDP `Target.createTarget({ background: true })`. Playwright's `context.newPage()` brings the tab to the front and takes over the window the user is working in. Background tabs still accept clicks, typing and slider keys.
 
 ## Sandbox / runtime
 - Chrome fails to start with a Crashpad permission error inside restricted sandboxes (macOS `bootstrap_check_in … Permission denied`). Launch Chrome from the user's normal environment, then attach over CDP.

@@ -279,7 +279,7 @@ test("tool schemas validate paid defaults, paths, modes, duration and 4K inputs"
     tools.flow_generate_video.schema.parse({ prompt: "p", mode: "frames" }),
   );
   assert.throws(() =>
-    tools.flow_generate_video.schema.parse({ prompt: "p", duration: 5 }),
+    tools.flow_generate_video.schema.parse({ prompt: "p", duration: 2.5 }),
   );
   assert.throws(() =>
     tools.flow_upload_media.schema.parse({ paths: ["relative.png"] }),

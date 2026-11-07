@@ -3,6 +3,11 @@ import { selectors as S, icons } from "./selectors.js";
 import { lookup, detectLanguage, matches } from "./strings.js";
 export async function unique(locator, label) {
   const visible = locator.filter({ visible: true });
+  // Flow renders late after navigation: wait briefly for a first match before counting.
+  await visible
+    .first?.()
+    .waitFor({ timeout: 8000 })
+    .catch(() => {});
   const count = await visible.count();
   if (count !== 1)
     throw new Error(
@@ -45,11 +50,29 @@ export async function click(page, key, options) {
   if (el) await el.click();
   return el;
 }
+// Flow buttons glue an icon ligature to the label ("crop_16_916:9") and model
+// items add a caption ("12월 5일에 지원 중단 예정"). Compare the label alone,
+// ignoring case, spaces and dashes ("Veo 3.1 Fast" == "Veo 3.1 - Fast").
+export const normalizeLabel = (s) =>
+  s.toLowerCase().replace(/[\s\-–—]+/g, "");
 export async function exactOption(page, value, scope = page) {
-  const el = scope
-    .locator(S.options)
-    .filter({ hasText: new RegExp(`^${escapeRegex(value)}$`) });
-  return unique(el, value);
+  const all = scope.locator(S.options);
+  await all.first().waitFor({ timeout: 8000 }).catch(() => {});
+  const hits = await all.evaluateAll((els, v) => {
+    const norm = (s) => s.toLowerCase().replace(/[\s\-–—]+/g, "");
+    return els
+      .map((e, i) => {
+        if (!e.getBoundingClientRect().width) return -1;
+        const c = e.cloneNode(true);
+        c.querySelectorAll('mat-icon, [aria-hidden="true"], .caption').forEach((x) => x.remove());
+        const label = c.querySelector(".label")?.textContent ?? c.textContent;
+        return norm(label) === norm(v) ? i : -1;
+      })
+      .filter((i) => i >= 0);
+  }, value);
+  if (hits.length !== 1)
+    throw new Error(`UI changed: ${value} matched ${hits.length} elements; refusing to guess.`);
+  return all.nth(hits[0]);
 }
 export const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 export async function typePrompt(page, text) {
@@ -174,18 +197,49 @@ export async function openSettings(page) {
   await click(page, "settings");
 }
 export async function settingsPanel(page) {
+  // The model menu opens a second overlay, so prefer the pane that holds the settings component.
+  const settings = page.locator(S.settingsPanel);
+  if ((await settings.count()) === 1) return settings;
   const overlay = page.locator(S.overlay);
   return (await overlay.count()) === 1
     ? overlay
     : unique(page.locator(S.popover), "settings popover");
 }
 async function assertSelected(el, label) {
-  const state =
-    (await el.getAttribute("aria-checked")) ||
-    (await el.getAttribute("aria-selected")) ||
-    (await el.getAttribute("data-state"));
-  if (!["true", "checked"].includes(state))
-    throw new Error(`Cannot verify setting ${label}`);
+  // Angular updates aria-checked a tick after the click: poll briefly.
+  for (let i = 0; i < 20; i++) {
+    const state =
+      (await el.getAttribute("aria-checked")) ||
+      (await el.getAttribute("aria-selected")) ||
+      (await el.getAttribute("data-state"));
+    if (["true", "checked"].includes(state)) return;
+    await new Promise((r) => setTimeout(r, 100));
+  }
+  throw new Error(`Cannot verify setting ${label}`);
+}
+// Newer Flow builds use a slider; step it with the keyboard and read the label.
+async function setDuration(page, panel, duration) {
+  const slider = panel.locator(S.durationSlider);
+  if (!(await slider.count())) {
+    const el = await durationOption(page, panel, duration);
+    await el.click();
+    return assertSelected(el, "duration");
+  }
+  const read = async () =>
+    Number((await panel.locator(S.durationValue).innerText()).match(/\d+/)?.[0]);
+  await slider.focus();
+  for (let i = 0; i < 40; i++) {
+    const current = await read();
+    if (current === duration) return;
+    await page.keyboard.press(current < duration ? "ArrowRight" : "ArrowLeft");
+    await page.waitForTimeout(100);
+    if ((await read()) === current) break;
+  }
+  throw new Error(`Duration ${duration}s is not available for this model`);
+}
+async function checkDuration(page, panel, duration) {
+  if (await panel.locator(S.durationSlider).count()) return setDuration(page, panel, duration);
+  return assertSelected(await durationOption(page, panel, duration), "duration");
 }
 async function durationOption(page, panel, duration) {
   const suffixes = lookup("durationSuffix", await detectLanguage(page))
@@ -205,6 +259,25 @@ export async function stageSettings(page, type, args) {
   const mode = await control(page, type, { scope: panel, structural: false });
   await mode.click();
   await assertSelected(mode, type);
+  // Pick the model first: it decides which ratio, length and resolution options exist.
+  if (args.model) {
+    const modelButton = () =>
+      unique(panel.locator(S.modelButton), "model dropdown");
+    await (await modelButton()).click();
+    await (await exactOption(page, args.model, page.locator(S.menu))).click();
+    await page
+      .locator(S.menu)
+      .first()
+      .waitFor({ state: "hidden", timeout: 3000 })
+      .catch(() => {});
+    panel = await settingsPanel(page);
+    if (
+      !normalizeLabel(await (await modelButton()).innerText()).includes(
+        normalizeLabel(args.model),
+      )
+    )
+      throw new Error("Model selection did not persist");
+  }
   const values = [args.ratio, `x${args.quantity}`, args.resolution].filter(
     Boolean,
   );
@@ -213,30 +286,7 @@ export async function stageSettings(page, type, args) {
     await el.click();
     await assertSelected(el, value);
   }
-  if (args.duration) {
-    const el = await durationOption(page, panel, args.duration);
-    await el.click();
-    await assertSelected(el, "duration");
-  }
-  const modelButton = panel
-    .locator(S.buttons)
-    .filter({ hasText: /^(?:Nano Banana|Imagen|Veo|Omni)/ });
-  await (await unique(modelButton, "model dropdown")).click();
-  await (await exactOption(page, args.model)).click();
-  panel = await settingsPanel(page);
-  if (
-    !(
-      await (
-        await unique(
-          panel
-            .locator(S.buttons)
-            .filter({ hasText: /^(?:Nano Banana|Imagen|Veo|Omni)/ }),
-          "model dropdown",
-        )
-      ).innerText()
-    ).includes(args.model)
-  )
-    throw new Error("Model selection did not persist");
+  if (args.duration) await setDuration(page, panel, args.duration);
   if (type === "video")
     await click(page, args.mode === "text" ? "frames" : args.mode, {
       scope: panel,
@@ -248,11 +298,7 @@ export async function stageSettings(page, type, args) {
   );
   for (const value of values)
     await assertSelected(await exactOption(page, value, panel), value);
-  if (args.duration)
-    await assertSelected(
-      await durationOption(page, panel, args.duration),
-      "duration",
-    );
+  if (args.duration) await checkDuration(page, panel, args.duration);
   if (type === "video")
     await assertSelected(
       await control(page, args.mode === "text" ? "frames" : args.mode, {

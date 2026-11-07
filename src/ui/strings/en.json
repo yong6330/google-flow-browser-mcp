@@ -35,7 +35,7 @@
   "balancePattern": "(?:Google Flow|AI)\\s*credits?\\s*[:：]?\\s*(\\d[\\d,]*)",
   "busyPattern": "generating|processing|uploading|upscaling",
   "failurePattern": "failed|usage limit|quota exceeded",
-  "loginPattern": "sign in|verify your identity|captcha|unusual traffic",
+  "loginPattern": "sign in|verify your identity|unusual traffic",
   "durationSuffix": "s",
   "_verified": false
 }

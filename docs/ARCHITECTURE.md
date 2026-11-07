@@ -56,15 +56,19 @@ Video verification uses ffprobe when available: nonempty file, hash, codec, dime
 
 ## Live verification checklist
 
-All new UI workflows remain unverified against a signed-in account. `// UNVERIFIED-LIVE` comments identify these boundaries in source. Use a dedicated test project, inspect every dry run, and authorize each paid action explicitly.
+Items marked [x] were checked with dry runs on a signed-in Korean account in November 2026. Everything else remains unverified against a signed-in account. `// UNVERIFIED-LIVE` comments identify these boundaries in source. Use a dedicated test project, inspect every dry run, and authorize each paid action explicitly.
 
 - [ ] macOS, Windows and Linux detached system-browser launch, owned-CDP reuse, busy-port handling, default-profile refusal and sandbox Crashpad diagnostics.
-- [ ] First-run visible sign-in, challenge detection in each language, optional email verification and account popover credit parsing across account tiers.
-- [ ] Project list/open/create/name persistence; nav scoping on the deployed layout.
-- [ ] Image/video mode and model selected-state readback, ratio/quantity/resolution/duration, agent toggle and cost footer in settings popovers.
+- [x] Account panel email and credit parsing on a PRO account (ko).
+- [ ] First-run visible sign-in, challenge detection in each language, optional email verification and credit parsing on other tiers.
+- [x] Project list and open by name; nav scoping on the deployed layout.
+- [ ] Project create and name persistence.
+- [x] Image/video mode and model selection (Omni 1.2 Flash, Omni 1.1 Flash, Veo 3.1 Lite, Nano Banana 2.1), ratio, quantity, resolution, length slider and buttons, and the cost footer in dry runs.
+- [ ] Agent toggle; other models.
 - [ ] Text video has no stale frame attachments; frame start/end attachment and optional end clearing; ingredients search, exact names and reference clearing.
 - [ ] Upload chooser interception, filename dedupe and ingestion readback for all supported media kinds.
-- [ ] Virtual-grid coverage, duplicate captions, prompt and metadata extraction, both trash columns, caption staleness after mutations.
+- [x] Virtual-grid listing of a populated project (captions, kind, resolution).
+- [ ] Duplicate captions, prompt and metadata extraction, both trash columns, caption staleness after mutations.
 - [ ] Rename refusal on project-title fields; reversible per-tile trash/restore without interacting with toast navigation or permanent deletion.
 - [ ] Paid image/video exactly one click after confirmation, credit-floor reservation under concurrent workers, failure cards, completion correlation and cancellation.
 - [ ] Crash/restart between intent/click/result; polling recovery without a second paid click, including identical existing prompts.

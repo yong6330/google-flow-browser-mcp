@@ -239,7 +239,15 @@ tool(
   "flow_generate_image",
   "Stage image settings and report cost. Only confirm:true spends credits; returns job id.",
   z
-    .object({ ...generation, model: z.string().default("Nano Banana 2") })
+    .object({
+      ...generation,
+      model: z
+        .string()
+        .optional()
+        .describe(
+          'Model name exactly as Flow shows it, for example "Omni 1.2 Flash". Omit to keep the current selection.',
+        ),
+    })
     .strict()
     .refine((a) => !a.name || a.quantity === 1, "name requires quantity:1"),
   (a) => generate(getPage(), "image", a),
@@ -250,12 +258,28 @@ tool(
   z
     .object({
       ...generation,
-      model: z.string().default("Omni 1.1 Flash"),
+      model: z
+        .string()
+        .optional()
+        .describe(
+          'Model name exactly as Flow shows it, for example "Omni 1.2 Flash". Omit to keep the current selection.',
+        ),
       mode: z.enum(["text", "frames", "ingredients"]).default("text"),
       duration: z
-        .union([z.literal(4), z.literal(6), z.literal(8), z.literal(10)])
-        .default(8),
-      resolution: z.enum(["360p", "720p"]).default("720p"),
+        .number()
+        .int()
+        .min(1)
+        .max(30)
+        .optional()
+        .describe(
+          "Seconds. Omit to keep Flow's current length. Some models (Veo 3.1) have no length control.",
+        ),
+      resolution: z
+        .enum(["360p", "720p"])
+        .optional()
+        .describe(
+          "Omit to keep Flow's current resolution. Some models (Veo 3.1) have no resolution control.",
+        ),
       start_image: z.string().min(1).optional(),
       end_image: z.string().min(1).optional(),
     })
@@ -364,7 +388,12 @@ tool(
     asset_names: strings.min(1),
     resolution: z.enum(["1080p", "4k"]).default("1080p"),
     allow_4k: z.boolean().default(false),
-      accept_unknown_cost: z.boolean().default(false).describe('Proceed when Flow shows no credit cost in the download menu (field-tested: a 4 s 1080p upscale showed no cost and left the balance unchanged). The balance must still be readable and above creditFloor.'),
+    accept_unknown_cost: z
+      .boolean()
+      .default(false)
+      .describe(
+        "Proceed when Flow shows no credit cost in the download menu (field-tested: a 4 s 1080p upscale showed no cost and left the balance unchanged). The balance must still be readable and above creditFloor.",
+      ),
     compare_with: absolute.optional(),
   },
   (a) => runUpscale({ ...a, confirm: a.confirm ?? a.auto_confirm ?? false }),

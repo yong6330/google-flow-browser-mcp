@@ -16,7 +16,7 @@ if (args.includes("--help")) {
 }
 if (args.includes("--spend") && !value("--project"))
   throw new Error("--spend requires --project ID");
-const client = new Client({ name: "flow-manual-smoke", version: "2.0.0" });
+const client = new Client({ name: "flow-manual-smoke", version: "2.1.0" });
 const transport = new StdioClientTransport({
   command: process.execPath,
   args: [fileURLToPath(new URL("../src/index.js", import.meta.url))],

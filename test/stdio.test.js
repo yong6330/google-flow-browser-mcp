@@ -56,7 +56,7 @@ test("MCP stdio initialize and tools/list: stdout contains only JSON-RPC", async
     capabilities: {},
     clientInfo: { name: "offline-test", version: "1" },
   });
-  assert.equal(initialized.result.serverInfo.version, "2.0.0");
+  assert.equal(initialized.result.serverInfo.version, "2.1.0");
   child.stdin.write(
     JSON.stringify({ jsonrpc: "2.0", method: "notifications/initialized" }) +
       "\n",

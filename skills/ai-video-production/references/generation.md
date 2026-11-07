@@ -31,7 +31,9 @@ One row per cut:
 ## 4. Video generation (Flow / Omni / Veo style)
 
 - Mode **frames**: start frame (+ optional end frame). Mode ingredients: references only (less controllable). Use frames.
-- Settings used in practice: Omni Flash class model, 4 s, 720p preview, 16:9, 1 output per attempt. Read the credit line from the settings popover before every paid action; a 4 s clip cost ~7 credits, 8 s ~12.
+- Settings used in practice: Omni 1.2 Flash (Flow's default video model since November 2026), 720p, 16:9, 1 output per attempt, as short a length as the cut allows. Read the credit line from the settings popover before every paid action. In November 2026 Omni 1.2 Flash cost 12 credits for 4 s and 24 for 8 s at 720p x1; Veo 3.1 Lite cost 10 and has no resolution or length setting. Prices and models change, so trust the popover over these numbers.
+- Omni 1.1 Flash, Veo 3.1 Fast and Veo 3.1 Quality are marked for retirement on December 5, 2026. Do not plan a project around them.
+- With the Flow MCP, leave `model`, `resolution` and `duration` out to keep what Flow already has selected. Name the model exactly as Flow shows it when you want a different one.
 - Prompt skeleton: *camera (locked / ≤5 % drift) → the single action in order → what must stay identical (room, signs, the other person) → what must never happen (turning around, new objects, text) → style tail*. End every prompt with a fixed tail, e.g. "Keep the exact hand-drawn ink-line illustration look of the image, flat graphic shading, no morphing, no camera shake, no extra people, no text, no subtitles."
 - Camera moves must be tiny: "static, or a push-in of at most 3–5 %". An unqualified "slow push-in" can double a person's size in 4 s.
 - **Actions go one way, once.** Say "he turns his head to the right once and holds" or "walks steadily in one direction"; models happily turn and come back, walk in place, or reverse.

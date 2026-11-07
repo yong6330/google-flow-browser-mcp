@@ -184,14 +184,31 @@ async function attach(options) {
     `http://127.0.0.1:${launched.port}`,
   );
   const context = browser.contexts()[0];
-  const page =
-    context.pages().find((p) => isFlowUrl(p.url())) ||
-    (await context.newPage());
-  if (!isFlowUrl(page.url()))
-    await page.goto(launched.config.flowUrl, { waitUntil: "domcontentloaded" });
-  page.setDefaultTimeout(8000);
-  connection = { ...launched, browser, context, page };
+  connection = { ...launched, browser, context };
+  // Work in our own background tab so the user's tabs, focus and scroll stay untouched.
+  const current = context.pages().find((p) => isFlowUrl(p.url()));
+  const page = await backgroundPage(
+    current ? current.url() : launched.config.flowUrl,
+  );
+  connection.page = page;
   return connection;
+}
+// Target.createTarget with background:true opens a tab without activating it,
+// unlike context.newPage(), which brings the tab to the front.
+async function backgroundPage(url) {
+  const { browser, context } = connection;
+  const cdp = await browser.newBrowserCDPSession();
+  try {
+    const [page] = await Promise.all([
+      context.waitForEvent("page"),
+      cdp.send("Target.createTarget", { url: "about:blank", background: true }),
+    ]);
+    page.setDefaultTimeout(8000);
+    await page.goto(url, { waitUntil: "domcontentloaded" });
+    return page;
+  } finally {
+    await cdp.detach().catch(() => {});
+  }
 }
 export function getPage() {
   if (!connection) throw new Error("Call flow_connect first.");
@@ -217,7 +234,7 @@ export const getBrowser = () => connection?.browser;
 export const isBrowserConnected = () => !!connection?.browser.isConnected();
 export async function workerPage(url, { signal } = {}) {
   if (!isFlowUrl(url)) throw new Error("Refusing non-Flow URL");
-  const p = await getContext().newPage();
+  const p = await backgroundPage("about:blank");
   if (signal) {
     const close = () => void p.close().catch(() => {});
     signal.addEventListener("abort", close, { once: true });
@@ -232,7 +249,11 @@ export async function workerPage(url, { signal } = {}) {
   return p;
 }
 export async function closeBrowser() {
-  if (connection) await connection.browser.close();
+  // Close only the tab this server opened; the user's tabs stay as they were.
+  if (connection) {
+    await connection.page?.close().catch(() => {});
+    await connection.browser.close();
+  }
   connection = null;
 }
 export const browserStatus = () =>

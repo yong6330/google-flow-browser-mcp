@@ -17,10 +17,22 @@ export async function projects(page, args) {
   }
   await page.goto(config.flowUrl, { waitUntil: "domcontentloaded" });
   await guard(page);
+  await page
+    .locator(S.projectLinks)
+    .first()
+    .waitFor({ timeout: 10000 })
+    .catch(() => {});
+  // The link text is a generic "open project" label; the name is in the card title.
   const list = await page.locator(S.projectLinks).evaluateAll((els) =>
     els
       .map((e) => ({
-        name: (e.innerText || e.getAttribute("aria-label") || "").trim(),
+        name: (
+          e.closest(".project-card")?.querySelector(".project-title-text")
+            ?.innerText ||
+          e.innerText ||
+          e.getAttribute("aria-label") ||
+          ""
+        ).trim(),
         url: e.href,
       }))
       .filter((e, i, a) => a.findIndex((v) => v.url === e.url) === i),

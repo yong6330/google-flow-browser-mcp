@@ -9,7 +9,8 @@ export const selectors = {
   tiles: "flow-grid-tile-container",
   title: "input.editable-text-input:visible",
   thumbnail: "img, video",
-  nav: 'nav, [role="navigation"], [class*="sidebar"]',
+  // The header <nav> only holds the home button; sections live in the role=navigation list.
+  nav: '[role="navigation"]',
   settings: "button[aria-haspopup]:visible",
   popover:
     '[role="dialog"]:visible, [role="menu"]:visible, .cdk-overlay-pane:visible',
@@ -27,7 +28,14 @@ export const selectors = {
   duration: '[data-duration], [class*="duration"]',
   resolution: '[data-resolution], [class*="resolution"]',
   created: "time, [data-created]",
+  settingsPanel: ".cdk-overlay-pane:visible:has(flow-prompt-box-settings)",
+  modelButton: 'button[aria-haspopup="menu"]:visible',
+  menu: '[role="menu"]:visible',
+  durationSlider: 'flow-duration-slider input[type="range"]',
+  durationValue: "flow-duration-slider .duration-slider-value",
   progress: '[role="progressbar"], [aria-busy="true"]',
+  accountHeader: ".header-user-button",
+  accountPanel: '[role="dialog"].panel',
   account:
     '[data-account-email], [aria-label*="@"], [data-testid="account-menu"], [data-test-id="account"]',
   plan: "button",
