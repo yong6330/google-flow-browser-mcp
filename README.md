@@ -1,24 +1,109 @@
-# Google Flow Browser MCP 2.0
+<div align="center">
 
-Control Google Flow image and video creation from Claude Code, Claude Desktop, Cursor, or another MCP client, using your own Google account in a real Chrome/Chromium/Edge window. No API key, profile copying, browser download, or configuration file is required. Sign in manually once in a dedicated persistent profile.
+# 🎬 Google Flow Browser MCP
 
-**Fork notice:** fork of [TMSSS05/google-flow-browser-mcp](https://github.com/TMSSS05/google-flow-browser-mcp). Credit for the original design belongs to TMSSS05. Original and fork contributions are covered by the [MIT license](LICENSE).
+**Drive [Google Flow](https://flow.google.com/) image and video generation from your AI agent, with your own Google account.**
 
-This refactor has offline coverage. Its new browser workflows have **not been validated against a signed-in live Flow session**. Selectors fail closed when the page differs. See the [live verification checklist](docs/ARCHITECTURE.md#live-verification-checklist).
+<p>
+  <img src="https://img.shields.io/badge/version-2.1.0-blue?style=flat-square" alt="Version 2.1.0">
+  <img src="https://img.shields.io/badge/node-%3E%3D18-green?style=flat-square" alt="Node >= 18">
+  <img src="https://img.shields.io/badge/license-MIT-lightgrey?style=flat-square" alt="License MIT">
+  <img src="https://img.shields.io/badge/MCP-server-8A2BE2?style=flat-square" alt="MCP Server">
+  <img src="https://img.shields.io/badge/Claude%20Code-ready-D97757?style=flat-square" alt="Claude Code ready">
+  <img src="https://img.shields.io/badge/credits-dry%20run%20first-orange?style=flat-square" alt="Dry run first">
+</p>
 
-## Requirements and 60-second quick start
+<br>
 
-Install Node.js 18+ and a system Chrome, Chromium, or Microsoft Edge. Flow availability, account access, subscriptions, and credits depend on Google.
+[✨ Features](#-features) •
+[🚀 Quick Start](#-quick-start) •
+[🔧 Tools](#-tools) •
+[💳 Credits & Jobs](#-credits--jobs) •
+[⚙️ Configuration](#️-configuration) •
+[🛡️ Safety](#️-safety) •
+[🇰🇷 한국어](#-한국어-안내)
+
+<br>
+
+</div>
+
+---
+
+> **Fork notice:** this is a fork of [TMSSS05/google-flow-browser-mcp](https://github.com/TMSSS05/google-flow-browser-mcp), rebuilt while making a real 30-cut music video. Credit for the original design belongs to TMSSS05. Both the original and the fork are covered by the [MIT license](LICENSE).
+
+---
+
+## 📸 What It Does
+
+This MCP server connects Claude Code, Claude Desktop, Cursor or any other MCP client to **Google Flow** through a real Chrome, Chromium or Edge window. Your agent can:
+
+- 🎨 **Generate images** with Flow's image models (Nano Banana 2.1 in November 2026)
+- 🎬 **Generate videos** from text, start/end frames or reference ingredients (Omni 1.2 Flash, Omni 1.1 Flash, Veo 3.1)
+- 🗂️ **Manage projects and assets**: list, open, upload, rename, trash and restore
+- ⬇️ **Download and upscale** to 1080p or 4K with file checks
+- 🧑 **Stage characters, scenes and Grid Architect** jobs
+- 🔍 **Inspect any Flow page** when the UI changes
+
+No API key, no copied browser profile and no config file. You sign in once by hand in a dedicated profile.
+
+---
+
+## ✨ Features
+
+<table>
+<tr>
+  <td width="50%">
+
+### 🤖 For AI agents
+  </td>
+  <td width="50%">
+
+### 🙋 For humans
+  </td>
+</tr>
+<tr>
+  <td>
+
+- **30 MCP tools** with JSON schemas
+- **Dry run by default**: settings and cost come back before anything is spent
+- **Persistent job queue** that resumes after a restart without clicking Generate twice
+- **Fails closed** when the UI looks different instead of guessing
+- **Korean UI field-tested**, with English, French and Japanese labels
+  </td>
+  <td>
+
+- **Your account, your browser**: no password ever typed by the server
+- **Works in a background tab**, so your window and focus stay yours
+- **Credit floor** and explicit `confirm: true` for every paid action
+- **4K only after 1080p is approved**, never chained
+- **No telemetry**, no permanent delete tool, watermark kept
+  </td>
+</tr>
+</table>
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+| What | Why |
+|------|-----|
+| **Node.js ≥ 18** | Runs the MCP server |
+| **Chrome, Chromium or Edge** | The system browser is used; nothing is downloaded |
+| **An MCP client** | Claude Code, Claude Desktop, Cursor and others |
+| **A Google account with Flow access** | Plans and credits come from Google |
+
+### 1️⃣ Add the server
 
 ```sh
 claude mcp add google-flow -- npx -y github:yong6330/google-flow-browser-mcp
 ```
 
-Restart the MCP client, ask it to call `flow_connect`, and sign in in the visible dedicated browser window. Run `flow_connect` again after sign-in. Ask for `flow_projects` with `action: "list"`, then open a project. Ask for a dry-run image or video setup; inspect the settings and cost before giving confirmation.
+<details>
+<summary><strong>Claude Desktop or Cursor</strong></summary>
 
-The GitHub command installs the version on the default branch (`main`).
-
-Claude Desktop configuration (merge into its existing `mcpServers` object):
+Merge this into the existing `mcpServers` object:
 
 ```json
 {
@@ -31,140 +116,295 @@ Claude Desktop configuration (merge into its existing `mcpServers` object):
 }
 ```
 
-Cursor's MCP configuration uses the same `mcpServers` JSON above. On Windows, clients that cannot directly spawn `npx` can use `"command": "cmd"` and `"args": ["/c", "npx", "-y", "github:yong6330/google-flow-browser-mcp"]`.
+On Windows, clients that cannot spawn `npx` directly can use `"command": "cmd"` with `"args": ["/c", "npx", "-y", "github:yong6330/google-flow-browser-mcp"]`.
+</details>
 
-The browser adapter is pinned to `playwright-core` 1.56.1 to preserve Node 18 support; newer releases require Node 20. System-browser compatibility still needs live checks.
+### 2️⃣ Sign in once
 
-For a local checkout:
+Restart the client and ask it to call `flow_connect`. A dedicated browser window opens. Sign in there by hand, then call `flow_connect` again.
+
+### 3️⃣ Try a dry run
+
+```text
+List my Flow projects, open one, and stage an 8 second Omni 1.2 Flash video
+of a ceramic cup on a wooden table. Show me the cost before spending anything.
+```
+
+The agent gets the staged settings and the credit cost back. Nothing is spent until you say yes and it sends `confirm: true`.
+
+<details>
+<summary><strong>Run from a local checkout</strong></summary>
 
 ```sh
+git clone https://github.com/yong6330/google-flow-browser-mcp.git
+cd google-flow-browser-mcp
 npm install
 npm test
 npm run doctor
 npm start
 ```
 
-`npm start` speaks MCP on stdout; diagnostics go to stderr. It does not launch Chrome until requested. Doctor works without login and does not launch Chrome.
+`npm start` speaks MCP on stdout and logs to stderr. It does not open a browser until a tool asks for one. `npm run doctor` works without signing in.
+</details>
 
-## Configuration (optional)
+---
 
-Precedence: supported tool argument → `FLOW_MCP_*` environment variable → user JSON config → default. Unknown config keys warn on stderr; invalid values stop startup. An explicit `confirm: false` overrides the deprecated `auto_confirm: true` alias.
+## 🔄 How a Paid Job Flows
 
-Config file: `$FLOW_MCP_CONFIG`, or:
+```mermaid
+flowchart LR
+  A[Agent asks for a video] --> B[Stage settings in a background tab]
+  B --> C[Read cost and balance from Flow]
+  C --> D{confirm: true?}
+  D -- no --> E[Return settings and cost<br/>nothing spent]
+  D -- yes --> F[Check credit floor]
+  F --> G[Click Generate once]
+  G --> H[Poll until the new card is ready]
+  H --> I[Optional download and file checks]
+```
 
-| Platform | Default                                                                                    |
-| -------- | ------------------------------------------------------------------------------------------ |
-| macOS    | `~/Library/Application Support/google-flow-mcp/config.json`                                |
-| Windows  | `%APPDATA%\google-flow-mcp\config.json`                                                    |
-| Linux    | `$XDG_CONFIG_HOME/google-flow-mcp/config.json`, or `~/.config/google-flow-mcp/config.json` |
+---
 
-| Config key            | Environment variable             | Default / meaning                                                                  |
-| --------------------- | -------------------------------- | ---------------------------------------------------------------------------------- |
-| `home`                | `FLOW_MCP_HOME`                  | `~/.google-flow-mcp` (absolute path)                                               |
-| `chromePath`          | `FLOW_MCP_CHROME_PATH`           | Automatic system browser discovery; `flow_connect` override                        |
-| `flowUrl`             | `FLOW_MCP_FLOW_URL`              | `https://flow.google.com/`                                                         |
-| `expectedAccount`     | `FLOW_MCP_EXPECTED_ACCOUNT`      | Unset; report email if available. If set, require a match; `flow_connect` override |
-| `cdpPort`             | `FLOW_MCP_CDP_PORT`              | `9222`; choose a free port if occupied; `flow_connect` override                    |
-| `headless`            | `FLOW_MCP_HEADLESS`              | `false`; use visible first-run sign-in; `flow_connect` override                    |
-| `maxConcurrentJobs`   | `FLOW_MCP_MAX_CONCURRENT_JOBS`   | `1`, allowed `1`–`3`                                                               |
-| `creditFloor`         | `FLOW_MCP_CREDIT_FLOOR`          | `0`; paid tool argument override                                                   |
-| `jobTimeoutMs`        | `FLOW_MCP_JOB_TIMEOUT_MS`        | `600000`                                                                           |
-| `pollIntervalMs`      | `FLOW_MCP_POLL_INTERVAL_MS`      | `5000`                                                                             |
-| `downloadWaitMs`      | `FLOW_MCP_DOWNLOAD_WAIT_MS`      | `300000`                                                                           |
-| `idempotencyWindowMs` | `FLOW_MCP_IDEMPOTENCY_WINDOW_MS` | `86400000` (24 hours)                                                              |
-| `uiStrings`           | `FLOW_MCP_UI_STRINGS`            | `{}`; language → key → string/string array; env value is JSON                      |
+## 🔧 Tools
 
-Boolean environment values must be `true` or `false`. Config examples: [config/flow.config.example.json](config/flow.config.example.json). Only options advertised in a tool's schema can be overridden per call.
+Every tool validates its arguments and publishes a JSON schema through MCP `tools/list`. Assets can be matched by `key`, by exact `caption` plus `prompt`, or by inventory `index`. Cards that cannot be told apart are refused.
 
-Data lives under `home`: `profile/`, `outputs/`, `logs/`, `state/`, `screenshots/`, `temp/`. Screenshots are taken only on explicit request. Downloads use `outputs/`, or an absolute per-call `output_folder`. The server never writes to the current directory or the user's Downloads folder by default. A separate profile is created from scratch; your regular browser profile is never read or copied.
+### 🌐 Connection & Status
 
-Files remain until you clean them. `flow_cleanup` defaults to a preview and covers only logs, screenshots, and temp files older than `older_than_days` (default 7). Use `confirm: true` to remove them. It excludes profiles, outputs and job state. Keep state files to preserve duplicate-submission protection. Use one server per home; multiple clients need separate homes and separate sign-ins.
+| Tool | What it does |
+|------|-------------|
+| `flow_connect` / `flow_disconnect` | Launch or attach the dedicated browser. Disconnect closes only the server's own tab |
+| `flow_status` | Connection and persisted job state, without opening a browser |
+| `flow_doctor` | Node, browser path, profile, CDP, login, language and credits |
+| `flow_account_check` / `flow_credits` | Signed-in email and credit balance from the account panel |
+| `flow_screenshot` | On-demand screenshot with a short timeout and CDP fallback |
 
-## Tools
+### 🗂️ Projects & Assets
 
-All tools validate arguments and expose JSON schemas via MCP `tools/list`. Asset matches accept `key`, or an exact `caption` plus `prompt`, or an inventory `index`. Re-list after mutations. Exact duplicate caption/prompt cards are deliberately refused when they cannot be distinguished safely.
+| Tool | What it does |
+|------|-------------|
+| `flow_projects` | `action: list \| open \| create` by `name` or `id` |
+| `flow_list_assets` | Scans the virtual grid, including both trash columns |
+| `flow_upload_media` | Uploads absolute `paths[]`, skips duplicates by file name |
+| `flow_rename_asset` | Renames only after the opened caption field is verified |
+| `flow_trash_assets` / `flow_restore_assets` | Dry run unless `confirm: true`. There is no permanent delete |
 
-| Tool                                                                       | Arguments / behavior                                                                                                                                                       |
-| -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `flow_connect` / `flow_disconnect`                                         | Launch or attach owned CDP; detach without deleting profile                                                                                                                |
-| `flow_status` / `flow_doctor`                                              | Connection, jobs / Node, browser path, profile, CDP, login, language, credits                                                                                              |
-| `flow_account_check` / `flow_credits`                                      | Read account popover; optional expected-account check / balance                                                                                                            |
-| `flow_projects`                                                            | `action: list\|open\|create`, `name` or `id`                                                                                                                               |
-| `flow_list_assets`                                                         | `type: image\|video\|all`, `include_trashed`; scans the virtual grid, including both trash columns                                                                         |
-| `flow_upload_media`                                                        | Absolute `paths[]`, `wait`; deduplicate by file name and confirm ingestion; returns a job                                                                                  |
-| `flow_generate_image`                                                      | `prompt`, `model`, `ratio`, `quantity` 1–4, `reference_images[]` (existing asset names)                                                                                    |
-| `flow_generate_video`                                                      | `prompt`, `mode: text\|frames\|ingredients`, `start_image`, optional `end_image`, or `reference_images[]`; optional `model` (as Flow shows it, e.g. `Omni 1.2 Flash`), optional `duration` in seconds and `resolution` 360p/720p (omitted values keep Flow's current selection; Veo 3.1 has neither), ratio, quantity |
-| `flow_rename_asset`                                                        | `match`, `name`; verify the opened caption field before typing                                                                                                             |
-| `flow_trash_assets` / `flow_restore_assets`                                | `matches[]`, dry run unless `confirm: true`; no permanent-delete tool                                                                                                      |
-| `flow_download_asset`                                                      | `match`, `quality: 270p-gif\|720p\|1080p`, `output_folder`; 1080p routes through paid upscale safeguards                                                                   |
-| `flow_upscale_download`                                                    | `asset_names[]`, `resolution: 1080p\|4k`, `confirm`, `allow_4k`, `wait`, optional `compare_with` absolute local file                                                       |
-| `flow_download_latest`                                                     | Compatibility alias: inventory the first asset, then download it safely                                                                                                    |
-| `flow_screenshot`                                                          | Optional `name`; short timeout plus CDP fallback                                                                                                                           |
-| `flow_cleanup`                                                             | `older_than_days`, dry run unless `confirm: true`                                                                                                                          |
-| `flow_job_status` / `flow_job_cancel`                                      | `job_id`; status optionally accepts `wait: true`; cancel stops local work only                                                                                             |
-| `flow_queue_status`                                                        | Recent persisted jobs, optional `history_limit`                                                                                                                            |
-| `flow_create_character` / `flow_import_character` / `flow_open_characters` | Stage character or import JSON / inspect section                                                                                                                           |
-| `flow_create_scene`                                                        | Stage `prompt` and optional `characters[]`                                                                                                                                 |
-| `flow_open_tools_gallery` / `flow_use_tool`                                | Inspect gallery / open exact `tool_name`, stage named text `params`                                                                                                        |
-| `flow_use_grid_architect`                                                  | Stage `theme_prompt`, `shot_prompts[]`, engine, ratio, visual logic, local references                                                                                      |
-| `flow_discover_ui`                                                         | Inspect current page; no automatic selector-map rewriting                                                                                                                  |
+### 🎨 Generation
 
-Generation tools can open a specified `project_id` or `project_name`; otherwise open a project first. Character/scene/grid staging also returns a job and accepts `wait`. Characters/scenes/grid/gallery retain their original tool names and remain staging/discovery workflows. Unknown or ambiguous controls produce errors instead of success guesses.
+| Tool | What it does |
+|------|-------------|
+| `flow_generate_image` | `prompt`, `model`, `ratio`, `quantity` 1–4, `reference_images[]` |
+| `flow_generate_video` | `prompt`, `mode: text \| frames \| ingredients`, `start_image`, `end_image` or `reference_images[]`, plus `ratio` and `quantity` |
 
-## Credits, jobs, parallelism, downloads
+For video, `model`, `duration` and `resolution` are optional. Leave them out to keep what Flow already has selected. Name the model as Flow shows it, for example `Omni 1.2 Flash`. `Veo 3.1 Fast` also finds `Veo 3.1 - Fast`. Veo 3.1 has no resolution or length setting.
 
-Image/video generation and upscale **default to dry run**. A dry run stages settings and returns a job containing the cost read from Flow. Only `confirm: true` (or deprecated `auto_confirm: true`) authorizes the paid click. If cost, balance, mode, or settings cannot be verified, paid submission stops. Upscale cost visibility is unverified; if Flow does not show it, this version deliberately blocks that paid action.
+### ⬇️ Download & Upscale
 
-Long jobs return `id` (batch non-waiting responses use `job_id`). Use `wait: false` for background work, then `flow_job_status`. The queue persists settings, pre-submit inventory and a write-ahead submission intent. After reconnecting following a restart it resumes polling, never re-clicks Generate. Results with ambiguous identity or uncertain submission require manual review. Identical project + prompt + frames + settings requests reuse a job within the configured window; `force: true` explicitly bypasses that protection. Never use force merely because polling timed out.
+| Tool | What it does |
+|------|-------------|
+| `flow_download_asset` | `quality: 270p-gif \| 720p \| 1080p` into your output folder |
+| `flow_upscale_download` | Batch 1080p or 4K with `confirm`, `allow_4k` and optional `compare_with` |
+| `flow_download_latest` | Compatibility alias for the newest asset |
 
-Recommend **at most three** concurrent jobs; Flow warns against many simultaneous upscales. Default concurrency is one. Set two or three only after checking stability. Batch upscale reduces to one after an error and never automatically retries a paid submission. Credit reservations are conservative: uncertain jobs continue reserving their cost. Cancellation cannot cancel a generation already running at Google or promise a refund.
+### 📊 Jobs & Housekeeping
 
-**Verify the 1080p result and get the user's OK before 4K; never chain 1080p and 4K.** 4K requires both `confirm: true` and `allow_4k: true`.
+| Tool | What it does |
+|------|-------------|
+| `flow_job_status` / `flow_job_cancel` | Follow or stop a job by `job_id`. Cancel stops local work only |
+| `flow_queue_status` | Recent persisted jobs |
+| `flow_cleanup` | Removes old logs, screenshots and temp files. Dry run unless `confirm: true` |
 
-Outputs keep their sparkle watermark. ZIP downloads preserve Unicode names, never extract archive paths directly, and use unique local filenames. `ffprobe` is optional: when available, video size, codec, duration and requested minimum resolution are checked. SHA-256 and file size are always reported. Optional `compare_with` uses `ffmpeg` SSIM on aligned scaled frames; this is a similarity aid, not proof of asset identity or creative acceptance.
+### 🧑 Characters, Scenes & Tools
 
-## Languages
+| Tool | What it does |
+|------|-------------|
+| `flow_create_character` / `flow_import_character` / `flow_open_characters` | Stage a character, import JSON, inspect the section |
+| `flow_create_scene` | Stage a `prompt` with optional `characters[]` |
+| `flow_open_tools_gallery` / `flow_use_tool` | Inspect the gallery or open a tool by exact name |
+| `flow_use_grid_architect` | Stage theme, shot prompts, engine, ratio and references |
+| `flow_discover_ui` | List the controls on the current page |
 
-| Language        | Status                                                                                                        |
-| --------------- | ------------------------------------------------------------------------------------------------------------- |
-| Korean (`ko`)   | Labels grounded in [field-tested notes](docs/FLOW_UI_NOTES.md); new workflows still require live verification |
-| English (`en`)  | Best effort, `_verified: false`                                                                               |
-| French (`fr`)   | Best effort, `_verified: false`                                                                               |
-| Japanese (`ja`) | Best effort, `_verified: false`                                                                               |
+Generation tools accept `project_id` or `project_name`. Otherwise open a project first.
 
-Lookup prefers structural/role/aria/icon controls, then the detected dictionary, then other dictionaries. Detection uses HTML language or known labels. Unsupported languages can add overrides via `uiStrings` without modifying code.
+---
 
-To contribute a language, copy a file in `src/ui/strings/`, translate labels and numeric patterns, keep `_verified: false`, register it in `src/ui/strings.js`, and add offline fallback tests. Validate in a real signed-in UI before marking individual facts verified. Keep selectors/icons under `src/ui/`; append justified corrections to the UI notes rather than replacing evidence.
+## 💳 Credits & Jobs
 
-## Troubleshooting and manual checks
+| Rule | Detail |
+|------|--------|
+| **Dry run by default** | Image, video and upscale stage settings and return Flow's own cost line |
+| **Explicit spend** | Only `confirm: true` clicks a paid button. Unverifiable cost, balance or settings stop the job |
+| **Credit floor** | `creditFloor` keeps a minimum balance. Uncertain jobs keep their reservation |
+| **One click per job** | A write-ahead intent is saved before the click. After a restart the job resumes polling and never clicks again |
+| **Duplicate guard** | The same project, prompt, frames and settings reuse a job for 24 hours. `force: true` bypasses it on purpose |
+| **Parallelism** | One job by default, three at most. Batch upscale drops to one after an error |
+| **4K** | Needs `confirm: true` and `allow_4k: true`, and only after you approved the 1080p result |
 
-- **Crashpad / sandbox startup crash:** run `node scripts/start-browser.mjs` in a normal terminal outside the sandbox, sign in manually, then call `flow_connect` to attach. Do not weaken browser security or use your regular profile.
-- **Port in use:** unrelated processes are never killed or attached. The launcher picks another free local port. Only the dedicated profile's matching CDP marker is reused. If that profile is open without CDP, close its window and rerun the launcher.
-- **Login/captcha/verification:** complete it manually in the dedicated visible window, then retry connection. The server never types credentials or bypasses checks.
-- **Language or selector mismatch:** use `flow_discover_ui`, inspect the exact control labels, extend `uiStrings`. A missing setting stops the paid click.
-- **Account mismatch:** `expectedAccount` is optional. When set, inability to read the exact signed-in email is also a blocking error.
-- **Missing download after restart:** download events may not survive process loss. The job waits for an event without re-clicking the paid option; inspect the asset manually if none arrives. No regeneration is attempted.
+Downloads keep Flow's sparkle watermark. ZIP files keep Unicode names. SHA-256 and size are always reported. With `ffprobe` installed, codec, size, duration and resolution are checked too. `compare_with` adds an `ffmpeg` SSIM similarity check.
 
-Offline gates: `npm test`, `npm run doctor`, and `node --check` on JavaScript files. Manual live smoke (not part of tests):
+---
+
+## ⚙️ Configuration
+
+Everything is optional. Precedence is tool argument, then `FLOW_MCP_*` environment variable, then the user config file, then the default.
+
+| Platform | Config file |
+|----------|-------------|
+| macOS | `~/Library/Application Support/google-flow-mcp/config.json` |
+| Windows | `%APPDATA%\google-flow-mcp\config.json` |
+| Linux | `$XDG_CONFIG_HOME/google-flow-mcp/config.json` or `~/.config/google-flow-mcp/config.json` |
+
+`FLOW_MCP_CONFIG` points somewhere else. See [config/flow.config.example.json](config/flow.config.example.json).
+
+<details>
+<summary><strong>All options</strong></summary>
+
+| Key | Environment variable | Default |
+|-----|---------------------|---------|
+| `home` | `FLOW_MCP_HOME` | `~/.google-flow-mcp` |
+| `chromePath` | `FLOW_MCP_CHROME_PATH` | Found automatically |
+| `flowUrl` | `FLOW_MCP_FLOW_URL` | `https://flow.google.com/` |
+| `expectedAccount` | `FLOW_MCP_EXPECTED_ACCOUNT` | Unset. When set, the signed-in email must match |
+| `cdpPort` | `FLOW_MCP_CDP_PORT` | `9222`, or the next free port |
+| `headless` | `FLOW_MCP_HEADLESS` | `false` so you can sign in |
+| `maxConcurrentJobs` | `FLOW_MCP_MAX_CONCURRENT_JOBS` | `1` (allowed 1–3) |
+| `creditFloor` | `FLOW_MCP_CREDIT_FLOOR` | `0` |
+| `jobTimeoutMs` | `FLOW_MCP_JOB_TIMEOUT_MS` | `600000` |
+| `pollIntervalMs` | `FLOW_MCP_POLL_INTERVAL_MS` | `5000` |
+| `downloadWaitMs` | `FLOW_MCP_DOWNLOAD_WAIT_MS` | `300000` |
+| `idempotencyWindowMs` | `FLOW_MCP_IDEMPOTENCY_WINDOW_MS` | `86400000` (24 hours) |
+| `uiStrings` | `FLOW_MCP_UI_STRINGS` | `{}` extra UI labels per language, as JSON |
+
+Boolean environment values must be `true` or `false`. Unknown keys warn and invalid values stop startup.
+</details>
+
+### 📁 Where files go
+
+```
+~/.google-flow-mcp/
+├── profile/       dedicated browser profile (never your regular one)
+├── outputs/       downloads, unless you pass an absolute output_folder
+├── state/         job queue and duplicate protection
+├── logs/
+├── screenshots/   only when you ask for one
+└── temp/
+```
+
+Nothing is written to the current directory or your Downloads folder. Run one server per home. Two clients need two homes and two sign-ins.
+
+---
+
+## 🌍 Languages
+
+| Language | Status |
+|----------|--------|
+| 🇰🇷 Korean (`ko`) | Field-tested in November 2026 ([UI notes](docs/FLOW_UI_NOTES.md)) |
+| 🇺🇸 English (`en`) | Best effort |
+| 🇫🇷 French (`fr`) | Best effort |
+| 🇯🇵 Japanese (`ja`) | Best effort |
+
+Controls are found by role, aria label and icon first, then by the detected language's labels. Other languages can add labels through `uiStrings` without code changes.
+
+---
+
+## 🛡️ Safety
+
+| ✅ Principle | How it is enforced |
+|-------------|-------------------|
+| **Your account only** | A dedicated profile you sign into yourself. Your regular profile is never read or copied |
+| **No credentials** | The server never types passwords and stops on any login or verification screen |
+| **Your screen stays yours** | Automation runs in a background tab and never brings a tab to the front |
+| **No surprise spending** | Dry run first, explicit confirm, credit floor, one click per job |
+| **Nothing permanent** | Trash and restore only. The trash is never emptied |
+| **Provenance kept** | Flow's watermark is never removed or covered |
+
+> ⚠️ Use only an account you are allowed to operate and follow Google's terms. You are responsible for prompts, generated content and credit spending.
+
+---
+
+## ❓ FAQ & Troubleshooting
+
+<details>
+<summary><strong>Chrome crashes on start with a Crashpad or sandbox error</strong></summary>
+
+Run `node scripts/start-browser.mjs` from a normal terminal, sign in, then call `flow_connect` to attach. Do not weaken browser security or use your regular profile.
+</details>
+
+<details>
+<summary><strong>Port 9222 is already in use</strong></summary>
+
+Unrelated processes are never killed or attached. The launcher picks another free port and reuses only the dedicated profile's own CDP marker.
+</details>
+
+<details>
+<summary><strong>"Another MCP server owns this data directory"</strong></summary>
+
+One server already runs for that home, often from another client session. Close it, or give the second client its own `FLOW_MCP_HOME`.
+</details>
+
+<details>
+<summary><strong>"UI changed: … matched 0 elements"</strong></summary>
+
+Flow moved a control. Call `flow_discover_ui`, compare the labels, and add them through `uiStrings` if your language differs. Paid clicks stop until every setting can be verified.
+</details>
+
+<details>
+<summary><strong>A download is missing after a restart</strong></summary>
+
+Download events do not survive a process restart. The job waits without clicking the paid option again. Download the card by hand if nothing arrives.
+</details>
+
+<details>
+<summary><strong>How do I test against my live account without spending?</strong></summary>
 
 ```sh
-node scripts/live-smoke.mjs --help
 node scripts/live-smoke.mjs
 node scripts/live-smoke.mjs --project PROJECT_ID --prompt "A ceramic cup"
-# Only after reviewing the staged settings/cost and explicitly approving spending:
+# Only after you reviewed the staged settings and cost:
 node scripts/live-smoke.mjs --project PROJECT_ID --prompt "A ceramic cup" --spend --download
 ```
 
-The default script never spends credits. Use a signed-in dedicated profile, run only one MCP process for that home, and inspect the [architecture checklist](docs/ARCHITECTURE.md#live-verification-checklist) before accepting this as production-ready.
+The default run never spends credits. The [live checklist](docs/ARCHITECTURE.md#live-verification-checklist) shows what has been verified so far.
+</details>
 
-## Safety and responsibility
+---
 
-Use only an account you are authorized to operate and comply with Google's terms and applicable rules. You are responsible for prompts, generated content, subscriptions and credit spending. Do not remove or cover Flow's sparkle watermark. Never share the profile directory, cookies or job/log files containing sensitive prompts. There is no telemetry. No credential entry, verification bypass, permanent deletion, or unrelated-tab manipulation is offered. The server works in its own background tab, so it never brings a tab to the front or moves the window you are using.
+## 🇰🇷 한국어 안내
 
-## 한국어 안내
+Node.js 18 이상과 Chrome 또는 Chromium 또는 Edge가 필요합니다.
 
-Node.js 18 이상과 Chrome/Chromium/Edge가 필요합니다. `flow_connect`로 전용 브라우저를 열고 처음 한 번 직접 로그인하세요. 일반 Chrome 프로필을 읽거나 복사하지 않습니다. 이미지·영상 생성과 업스케일은 기본적으로 준비만 하며, 비용과 설정을 확인한 뒤 `confirm: true`를 전달해야 결제 동작을 실행합니다. 4K는 1080p 결과 확인과 사용자 동의 후 `allow_4k: true`도 필요합니다. 새 구현은 로그인된 실제 Flow에서 아직 검증하지 않았으므로, 오프라인 테스트 통과를 실제 생성 성공으로 해석하지 마세요.
+1. `claude mcp add google-flow -- npx -y github:yong6330/google-flow-browser-mcp` 로 서버를 추가합니다.
+2. `flow_connect` 를 부르면 전용 브라우저 창이 열립니다. 처음 한 번만 직접 로그인하세요.
+3. 생성과 업스케일은 기본이 시험 실행입니다. 설정과 크레딧 비용을 먼저 보여 주고 `confirm: true` 를 받아야 실제로 씁니다.
+4. 4K는 1080p 결과를 확인하고 승인한 뒤에만 `allow_4k: true` 로 진행합니다.
 
-## Companion skill: ai-video-production
+일반 Chrome 프로필은 읽거나 복사하지 않습니다. 자동화는 뒤쪽 탭에서만 돌기 때문에 쓰고 계신 창을 가져가지 않습니다. 한국어 화면은 2026년 11월 실제 계정에서 시험 실행으로 확인했습니다.
 
-`skills/ai-video-production/` is a Claude Code skill describing a complete AI-video workflow built on this server (cut sheet → base images → start/end-frame generation → frame-by-frame QA → upscale → beat-synced edit with Python and FFmpeg). Install it by copying the folder into `~/.claude/skills/`. The same skill is also published on its own at [google-flow-ai-video-production-skill](https://github.com/yong6330/google-flow-ai-video-production-skill).
+---
+
+## 🎞️ Companion Skill
+
+**[google-flow-ai-video-production-skill](https://github.com/yong6330/google-flow-ai-video-production-skill)** is a Claude Code skill for the whole AI video workflow on top of this server. It covers the cut sheet, base images, start/end-frame generation, frame-by-frame QA, upscale and a beat-synced Python + FFmpeg edit. A copy also ships in [`skills/ai-video-production/`](skills/ai-video-production/).
+
+---
+
+## 📚 More
+
+- [Changelog](CHANGELOG.md)
+- [Architecture and live checklist](docs/ARCHITECTURE.md)
+- [Flow UI notes](docs/FLOW_UI_NOTES.md)
+
+## 📄 License
+
+[MIT](LICENSE). Original work © [TMSSS05](https://github.com/TMSSS05/google-flow-browser-mcp). Modifications © yong6330.
+
+---
+
+<div align="center">
+  <sub>Built while making a real AI music video 🎵</sub>
+  <br>
+  <sub>
+    <a href="https://github.com/yong6330/google-flow-browser-mcp/issues">Report an issue</a> ·
+    <a href="https://github.com/yong6330/google-flow-ai-video-production-skill">Companion skill</a>
+  </sub>
+</div>
