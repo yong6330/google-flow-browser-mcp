@@ -167,4 +167,4 @@ Node.js 18 이상과 Chrome/Chromium/Edge가 필요합니다. `flow_connect`로 
 
 ## Companion skill: ai-video-production
 
-`skills/ai-video-production/` is a Claude Code skill describing a complete AI-video workflow built on this server (cut sheet → base images → start/end-frame generation → frame-by-frame QA → upscale → beat-synced edit with Python and FFmpeg). Install it by copying the folder into `~/.claude/skills/`.
+`skills/ai-video-production/` is a Claude Code skill describing a complete AI-video workflow built on this server (cut sheet → base images → start/end-frame generation → frame-by-frame QA → upscale → beat-synced edit with Python and FFmpeg). Install it by copying the folder into `~/.claude/skills/`. The same skill is also published on its own at [google-flow-ai-video-production-skill](https://github.com/yong6330/google-flow-ai-video-production-skill).
