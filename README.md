@@ -164,3 +164,7 @@ Use only an account you are authorized to operate and comply with Google's terms
 ## 한국어 안내
 
 Node.js 18 이상과 Chrome/Chromium/Edge가 필요합니다. `flow_connect`로 전용 브라우저를 열고 처음 한 번 직접 로그인하세요. 일반 Chrome 프로필을 읽거나 복사하지 않습니다. 이미지·영상 생성과 업스케일은 기본적으로 준비만 하며, 비용과 설정을 확인한 뒤 `confirm: true`를 전달해야 결제 동작을 실행합니다. 4K는 1080p 결과 확인과 사용자 동의 후 `allow_4k: true`도 필요합니다. 새 구현은 로그인된 실제 Flow에서 아직 검증하지 않았으므로, 오프라인 테스트 통과를 실제 생성 성공으로 해석하지 마세요.
+
+## Companion skill: ai-video-production
+
+`skills/ai-video-production/` is a Claude Code skill describing a complete AI-video workflow built on this server (cut sheet → base images → start/end-frame generation → frame-by-frame QA → upscale → beat-synced edit with Python and FFmpeg). Install it by copying the folder into `~/.claude/skills/`.
